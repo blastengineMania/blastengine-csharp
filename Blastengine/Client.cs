@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Transactions;
+using Blastengine;
 
 namespace Blastengine
 {
@@ -52,10 +53,16 @@ namespace Blastengine
 
         public async Task<BEObject?> PostText(string Path, string Data)
         {
-            var Response = await Exec("POST", Path, null, Data);
+            return await Exec("POST", Path, null, Data);
+        }
+
+        public async Task<BEObject?> PostFile(string Path, MultipartFormDataContent Form)
+        {
+            var Client = CreateClient();
+            var Url = $@"{EndPoint}{Path}";
+            var Response = await Client.PostAsync(Url, Form);
             var ResponseBody = await Response.Content.ReadAsStringAsync();
-            // ステータスコードのチェック（成功しているかどうか）
-            if (Response.StatusCode != System.Net.HttpStatusCode.Created)
+            if (!Response.IsSuccessStatusCode)
             {
                 throw new Exception(ResponseBody);
             }
@@ -64,26 +71,22 @@ namespace Blastengine
 
         public async Task<BEObject?> PutText(string Path, string Data)
         {
-            var Response = await Exec("PUT", Path, null, Data);
-            var ResponseBody = await Response.Content.ReadAsStringAsync();
-            // ステータスコードのチェック（成功しているかどうか）
-            if (Response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                throw new Exception(ResponseBody);
-            }
-            return JsonSerializer.Deserialize<BEObject>(json: ResponseBody!);
+            return await Exec("PUT", Path, null, Data);
         }
 
         public async Task<BEObject?> PatchText(string Path, string? Data)
         {
-            var Response = await Exec("PATCH", Path, null, Data);
-            var ResponseBody = await Response.Content.ReadAsStringAsync();
-            // ステータスコードのチェック（成功しているかどうか）
-            if (Response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                throw new Exception(ResponseBody);
-            }
-            return JsonSerializer.Deserialize<BEObject>(json: ResponseBody!);
+            return await Exec("PATCH", Path, null, Data);
+        }
+
+        public async Task<BEObject?> GetText(string Path, System.Collections.Specialized.NameValueCollection? Query)
+        {
+            return await Exec("GET", Path, Query, null);
+        }
+
+        public async Task<BEObject?> DeleteText(string Path)
+        {
+            return await Exec("DELETE", Path, null, null);
         }
 
         public HttpClient CreateClient()
@@ -93,51 +96,33 @@ namespace Blastengine
             return Client;
         }
 
-        public async Task<BEObject?> GetText(string Path, System.Collections.Specialized.NameValueCollection? Query)
-        {
-            var Response = await Exec("GET", Path, Query, null);
-            var ResponseBody = await Response.Content.ReadAsStringAsync();
-            // ステータスコードのチェック（成功しているかどうか）
-            if (Response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                throw new Exception(ResponseBody);
-            }
-            return JsonSerializer.Deserialize<BEObject>(json: ResponseBody!);
-        }
-
-        public async Task<BEObject?> DeleteText(string Path)
-        {
-            var Response = await Exec("DELETE", Path, null, null);
-            var ResponseBody = await Response.Content.ReadAsStringAsync();
-            // ステータスコードのチェック（成功しているかどうか）
-            if (Response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                throw new Exception(ResponseBody);
-            }
-            return JsonSerializer.Deserialize<BEObject>(json: ResponseBody!);
-        }
-
-        public async Task<HttpResponseMessage> Exec(
+        public async Task<BEObject?> Exec(
             string Method,
             string Path,
             System.Collections.Specialized.NameValueCollection? Query,
             string? Data)
         {
-            var Client = CreateClient();
             var QueryString = Query != null ? $@"?{Query.ToString()}" : "";
             var Url = $@"{EndPoint}{Path}{QueryString}";
-            if (Method == "POST" || Method == "PUT" || Method == "PATCH")
+            var Response = await GetReponse(Method, Url, Data);
+            var ResponseBody = await Response.Content.ReadAsStringAsync();
+            // ステータスコードのチェック（成功しているかどうか）
+            if (!Response.IsSuccessStatusCode)
             {
-                var Content = Data == null ? null : new StringContent(Data, Encoding.UTF8, "application/json");
-                if (Method == "POST") return await Client.PostAsync(Url, Content);
-                if (Method == "PUT") return await Client.PutAsync(Url, Content);
-                return await Client.PatchAsync(Url, Content);
+                throw new Exception(ResponseBody);
             }
-            if (Method == "DELETE")
-            {
-                return await Client.DeleteAsync(Url);
-            }
-            return await Client.GetAsync(Url);
+            return JsonSerializer.Deserialize<BEObject>(json: ResponseBody!);
+        }
+
+        private async Task<HttpResponseMessage> GetReponse(string Method, string Url, string? Data = null)
+        {
+            var Client = CreateClient();
+            if (Method == "GET") return await Client.GetAsync(Url);
+            if (Method == "DELETE") return await Client.DeleteAsync(Url);
+            var Content = Data == null ? null : new StringContent(Data, Encoding.UTF8, "application/json");
+            if (Method == "POST") return await Client.PostAsync(Url, Content);
+            if (Method == "PUT") return await Client.PutAsync(Url, Content);
+            return await Client.PatchAsync(Url, Content);
         }
 
     }

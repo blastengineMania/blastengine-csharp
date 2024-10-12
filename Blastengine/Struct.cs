@@ -37,12 +37,17 @@ namespace Blastengine
         public string Email { get; set; }
 
         [JsonPropertyName("insert_code")]
-        public List<InsertCode> CInsertCode { get; set; }
+        public List<InsertCode>? CInsertCode { get; set; }
 
-        public BulkTo(string Email, List<InsertCode> CInsertCode)
+        public BulkTo(string Email, List<InsertCode>? CInsertCode = null)
         {
             this.Email = Email;
-            this.CInsertCode = CInsertCode.Select(insertCode => new Blastengine.InsertCode($@"__{insertCode.Key}__", insertCode.Value)).ToList();
+            if (CInsertCode != null) {
+                this.CInsertCode = CInsertCode.Select(insertCode => new Blastengine.InsertCode($@"__{insertCode.Key}__", insertCode.Value)).ToList();
+            } else
+            {
+                this.CInsertCode = new List<InsertCode> { };
+            }
         }
 
     }
@@ -85,6 +90,7 @@ namespace Blastengine
 
     public struct Reservation
     {
+        [JsonConverter(typeof(DateTimeConverter))]
         [JsonPropertyName("reservation_time")]
         public DateTime? ReservationTime { get; set; }
     }

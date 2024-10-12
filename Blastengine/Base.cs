@@ -29,6 +29,9 @@ namespace Blastengine
         [JsonPropertyName("html_part")]
         public string? HtmlPart { get; set; }
 
+        [JsonIgnore]
+        public List<string> Attachments { get; set; }
+
         public string? Status { get; set; }
         public DateTime? DeliveryTime { get; set; }
         public DateTime UpdatedTime { get; set; }
