@@ -123,5 +123,69 @@ namespace BlastengineTest
             }).GetAwaiter().GetResult();
         }
 
+        [Test()]
+        public void TestCSVImport()
+        {
+            Task.Run(async () =>
+            {
+                var bulk = new Blastengine.Bulk();
+                bulk.TextPart = "Test from Bulk";
+                var dir = Directory.GetParent(System.IO.Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory)!);
+                DotNetEnv.Env.Load(dir?.Parent?.Parent + "/.env");
+                bulk.Subject = "テストバルクメール from C#";
+                bulk.TextPart = "これはテストメールです to __name__";
+                bulk.HtmlPart = "<h1>これはテストメールです to __name__</h1>";
+                bulk.From = new Blastengine.From(DotNetEnv.Env.GetString("FROM"), DotNetEnv.Env.GetString("NAME"));
+                var bol1 = await bulk.Begin();
+                Assert.That(bol1, Is.EqualTo(true));
+                Assert.That(bulk.DeliveryId > 0, Is.EqualTo(true));
+
+                var Dir = Directory.GetParent(Path.GetFullPath(".")).Parent!.Parent!.FullName;
+                var Job = await bulk.Import($@"{Dir}/example_success.csv");
+                while (!(await Job.Finished()))
+                {
+                    await Task.Delay(5000);
+                }
+                var bol2 = await bulk.Send();
+                Assert.That(bol2, Is.EqualTo(true));
+            }).GetAwaiter().GetResult();
+        }
+
+        [Test()]
+        public void TestCSVImport2()
+        {
+            Task.Run(async () =>
+            {
+                var bulk = new Blastengine.Bulk();
+                bulk.TextPart = "Test from Bulk";
+                var dir = Directory.GetParent(System.IO.Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory)!);
+                DotNetEnv.Env.Load(dir?.Parent?.Parent + "/.env");
+                bulk.Subject = "テストバルクメール from C#";
+                bulk.TextPart = "これはテストメールです to __name__";
+                bulk.HtmlPart = "<h1>これはテストメールです to __name__</h1>";
+                bulk.From = new Blastengine.From(DotNetEnv.Env.GetString("FROM"), DotNetEnv.Env.GetString("NAME"));
+                var bol1 = await bulk.Begin();
+                Assert.That(bol1, Is.EqualTo(true));
+                Assert.That(bulk.DeliveryId > 0, Is.EqualTo(true));
+
+                var Dir = Directory.GetParent(Path.GetFullPath(".")).Parent!.Parent!.FullName;
+                var Job = await bulk.Import($@"{Dir}/example_failed.csv");
+                while (!(await Job.Finished()))
+                {
+                    await Task.Delay(5000);
+                }
+                try
+                {
+                    Console.WriteLine(Job.Status);
+                    var errors = await Job.GetError();
+                    Console.WriteLine(errors[0]["email"]);
+                } catch (Exception err)
+                {
+                    Console.WriteLine(err);
+                }
+                await bulk.Delete();
+            }).GetAwaiter().GetResult();
+        }
+
     }
 }

@@ -25,7 +25,7 @@ namespace BlastengineTest
             Task.Run(async () =>
             {
                 var transaction = new Blastengine.Transaction();
-                transaction.DeliveryId = 2822;
+                transaction.DeliveryId = 2867;
                 await transaction.Get();
                 Assert.That(transaction.DeliveryId > 0, Is.EqualTo(true));
                 Assert.That(transaction.TotalCount > 0, Is.EqualTo(true));

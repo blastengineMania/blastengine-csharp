@@ -8,6 +8,9 @@ namespace Blastengine
         [JsonPropertyName("delivery_id")]
         public long DeliveryId { get; set; }
 
+        [JsonPropertyName("job_id")]
+        public long JobId { get; set; }
+
         [JsonPropertyName("from")]
         public Blastengine.From From { get; set; }
 
@@ -44,6 +47,18 @@ namespace Blastengine
         public long SoftErrorCount { get; set; }
         [JsonPropertyName("open_count")]
         public long OpenCount { get; set; }
+
+        [JsonPropertyName("percentage")]
+        public int Percentage { get; set; }
+        [JsonPropertyName("success_count")]
+        public long SuccessCount { get; set; }
+        [JsonPropertyName("failed_count")]
+        public long FailedCount { get; set; }
+        [JsonPropertyName("error_file_url")]
+        public string? ErrorFileUrl { get; set; }
+
+        [JsonPropertyName("mail_open_file_url")]
+        public string? MailOpenFileUrl { get; set; }
 
         public BEObject()
         {

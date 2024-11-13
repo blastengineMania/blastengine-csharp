@@ -94,5 +94,13 @@ namespace Blastengine
         [JsonPropertyName("reservation_time")]
         public DateTime? ReservationTime { get; set; }
     }
+
+    public struct BulkImportOptions
+    {
+        [JsonPropertyName("ignore_errors")]
+        public bool? IgnoreErrors { get; set; }
+        [JsonPropertyName("immediate")]
+        public bool? Immediate { get; set; }
+    }
 }
 

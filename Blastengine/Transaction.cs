@@ -18,14 +18,11 @@ namespace Blastengine
         [JsonPropertyName("insert_code")]
         public List<InsertCode> CInsertCode { get; set; }
 
-        public Transaction()
+        public Transaction(): base()
         {
-            Encode = "UTF-8";
             Cc = new List<string> { };
             Bcc = new List<string> { };
             CInsertCode = new List<InsertCode> { };
-            ListUnsubscribe = new ListUnsubscribe { };
-            Attachments = new List<string> { };
         }
 
         public void InsertCode(string Key, string Value)

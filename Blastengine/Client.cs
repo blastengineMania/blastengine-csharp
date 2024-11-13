@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -67,6 +68,18 @@ namespace Blastengine
                 throw new Exception(ResponseBody);
             }
             return JsonSerializer.Deserialize<BEObject>(json: ResponseBody!);
+        }
+
+        public async Task<Stream> GetFile(string Url)
+        {
+            var Client = CreateClient();
+            var Response = await Client.GetAsync(Url);
+            var ResponseBody = await Response.Content.ReadAsStreamAsync();
+            if (!Response.IsSuccessStatusCode)
+            {
+                throw new Exception(new StreamReader(ResponseBody, Encoding.UTF8).ReadToEnd());
+            }
+            return ResponseBody;
         }
 
         public async Task<BEObject?> PutText(string Path, string Data)

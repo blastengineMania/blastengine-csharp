@@ -4,8 +4,8 @@ using System.Web;
 
 namespace Blastengine
 {
-	public class Base
-	{
+    public class Base
+    {
         static public Client? Client;
 
         [JsonPropertyName("delivery_id")]
@@ -47,9 +47,11 @@ namespace Blastengine
         public long OpenCount { get; set; }
 
         public Base()
-		{
+        {
             Encode = "UTF-8";
-		}
+            Attachments = new List<string> { };
+            ListUnsubscribe = new ListUnsubscribe { };
+        }
 
         public async Task Get()
         {
@@ -58,8 +60,7 @@ namespace Blastengine
                 throw new Exception("DeliveryId is required.");
             }
             var Path = $@"/v1/deliveries/{DeliveryId}";
-            var obj = await Client!.GetText(Path, null);
-            if (obj == null) return;
+            var obj = await Client!.GetText(Path, null) ?? throw new Exception(@$"DeliveryId {DeliveryId} is not found.");
             DeliveryId = obj.DeliveryId;
             Status = obj.Status;
             DeliveryTime = obj.DeliveryTime;
